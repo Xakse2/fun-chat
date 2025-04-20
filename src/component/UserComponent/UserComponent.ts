@@ -1,4 +1,5 @@
-import { BaseComponent } from './baseComponent';
+import { BaseComponent } from '../baseComponent';
+import './UserComponent.scss';
 
 const statusColor = {
   true: 'green', // сделать норм цвеа
@@ -8,11 +9,14 @@ const statusColor = {
 export class UserComponent extends BaseComponent {
   constructor(user: any) {
     super({
-      className: ['user-wrapper'],
+      className: ['user'],
     });
 
-    const statusCircle = new BaseComponent({});
-    statusCircle.element.style.backgroundColor = 'black';
+    const statusCircle = new BaseComponent({
+      className: ['status-color'],
+    });
+    statusCircle.element.style.backgroundColor =
+      user.isLogined === true ? statusColor.true : statusColor.false;
 
     const userName = new BaseComponent({
       tag: 'label',

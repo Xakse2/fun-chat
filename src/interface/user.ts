@@ -1,5 +1,4 @@
-export interface user {
+export interface User {
   login: string;
   isLogined: boolean;
-  unread?: number;
 }

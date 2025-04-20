@@ -1,13 +1,41 @@
 import { socket } from '../api/apiSocket';
-import type { payloadType } from '../other/type';
+import type { Message, PayloadType } from '../type/websocketData';
 import { Observable } from '../util/observble/obserble';
 import { userId } from './user';
 import { users } from './usersState';
 
-type Message = payloadType['MSG_FROM_USER']['messages'];
-
 export class MessageState {
   private _messages = new Observable<Message[]>([]);
+
+  constructor() {
+    socket.on('MSG_FROM_USER', (data) => {
+      if (Array.isArray(data.payload.messages)) {
+        this.routMessage(data.payload.messages);
+      } else {
+        this.routMessage([data.payload.messages]);
+      }
+    });
+
+    socket.on('MSG_SEND', (data) => {
+      this.addMessage(data.payload.message);
+    });
+
+    socket.on('MSG_DELIVER', (data) => {
+      this.updateMessageStatus(data.payload.message);
+    });
+
+    socket.on('MSG_DELETE', (data) => {
+      this.deleteMessage(data.payload.message);
+    });
+
+    socket.on('MSG_EDIT', (data) => {
+      this.updateMessage(data.payload.message);
+    });
+
+    socket.on('MSG_READ', (data) => {
+      this.updateMessageStatus(data.payload.message);
+    });
+  }
 
   public get messages(): Observable<Message[]> {
     return this._messages;
@@ -25,19 +53,20 @@ export class MessageState {
     if (data[0].from === userId.chatWith.value || data[0].from === userId.selfLogin) {
       this._messages.set(data);
     } else {
-      users.addUnreadMessage(data);
+      // users.addUnreadMessage(data);
     }
   }
 
   public addMessage(message: Message): void {
     if (message.from != userId.chatWith.value && message.to != userId.chatWith.value) {
-      users.addUnreadMessage([message]);
+      // users.addUnreadMessage([message]);
       return;
     }
     this._messages.update((value) => [...value, message]);
   }
 
-  public updateMessage(data: payloadType['MSG_EDIT']['message']): void {
+  public updateMessage(data: PayloadType['MSG_EDIT']['message']): void {
+    // проверить
     this._messages.update((messages) =>
       messages.map((message) => {
         if (message.id === data.id) {
@@ -52,7 +81,7 @@ export class MessageState {
     );
   }
 
-  public updateMessageStatus(data: payloadType['MSG_DELIVER']['message']): void {
+  public updateMessageStatus(data: PayloadType['MSG_DELIVER']['message']): void {
     this._messages.update((messages) =>
       messages.map((message) => {
         if (message.id === data.id) {
@@ -66,7 +95,7 @@ export class MessageState {
     );
   }
 
-  public deleteMessage(data: payloadType['MSG_DELETE']['message']): void {
+  public deleteMessage(data: PayloadType['MSG_DELETE']['message']): void {
     this._messages.update((messages) => messages.filter((message) => message.id != data.id));
   }
 

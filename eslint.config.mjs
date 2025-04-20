@@ -35,6 +35,8 @@ export default [
         Audio: 'readonly',
         WebSocket: 'readonly',
         self: 'readonly',
+        alert: 'readonly',
+        sessionStorage: 'readonly',
       },
     },
     plugins: {

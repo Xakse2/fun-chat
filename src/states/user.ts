@@ -1,27 +1,28 @@
 import { socket } from '../api/apiSocket';
+import { session } from '../service/sessionStotrage';
 import { Observable } from '../util/observble/obserble';
 
 export class userState {
   public authorased: boolean = false;
   public chatWith = new Observable<string>('');
-  private _userId: string = self.crypto.randomUUID();
   private _login: string = '';
   private _password: string = '';
+
+  constructor() {
+    const log = session.getDate('login');
+    const pass = session.getDate('password');
+    if (log && pass) {
+      this._login = log;
+      this._password = pass;
+    }
+  }
 
   public get selfLogin(): string {
     return this._login;
   }
 
-  public get userId(): string | null {
-    return this._userId;
-  }
-
   public get password(): string {
     return this._password;
-  }
-
-  public set userId(id: string) {
-    this._userId = id;
   }
 
   public set password(password: string) {
@@ -33,7 +34,7 @@ export class userState {
   }
 
   public login(): void {
-    socket.login();
+    socket.login(this.selfLogin, this._password);
   }
 }
 

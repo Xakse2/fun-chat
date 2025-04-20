@@ -60,5 +60,9 @@ export class BaseComponent<T extends keyof HTMLElementTagNameMap = 'div'> {
       sub();
     });
   }
+
+  public sub(sub: () => void): void {
+    this.subscribers.push(sub);
+  }
   // добавить метод для листенеров что бы они удалялись потом
 }

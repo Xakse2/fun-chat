@@ -1,72 +1,43 @@
-import type { ServerMessage } from '../other/type';
+import type { PayloadType, ServerData } from '../type/websocketData';
+import { messagingID } from '../const/messagingID';
+import { session } from '../service/sessionStotrage';
 import { router } from '../router/route';
-import { message } from '../states/messageState';
-import { userId } from '../states/user';
-import { users } from '../states/usersState';
 
 export class ApiSocket {
-  public socket: WebSocket;
-  constructor() {
-    this.socket = new WebSocket('ws://localhost:4000');
+  public socket!: WebSocket;
 
-    const responseTypes = {
-      USER_LOGIN: (data: ServerMessage<'USER_LOGIN'>): void => {
-        console.log('login', data);
-        userId.selfLogin = data.payload.user.login;
-        router.go('/messager');
-      },
-      USER_ACTIVE: (data: ServerMessage<'USER_ACTIVE'>): void => {
-        users.addUsers(data.payload.users);
-      },
-      USER_INACTIVE: (data: ServerMessage<'USER_INACTIVE'>): void => {
-        users.addUsers(data.payload.users);
-      },
-      MSG_FROM_USER: (data: ServerMessage<'MSG_FROM_USER'>): void => {
-        if (Array.isArray(data.payload.messages)) {
-          message.routMessage(data.payload.messages);
-        } else {
-          message.routMessage([data.payload.messages]);
-        }
-      },
-      MSG_SEND: (data: ServerMessage<'MSG_SEND'>): void => {
-        message.addMessage(data.payload.message);
-      },
-      MSG_DELIVER: (data: ServerMessage<'MSG_DELIVER'>): void => {
-        message.updateMessageStatus(data.payload.message);
-      },
-      MSG_DELETE: (data: ServerMessage<'MSG_DELETE'>): void => {
-        message.deleteMessage(data.payload.message);
-      },
-      MSG_EDIT: (data: ServerMessage<'MSG_EDIT'>): void => {
-        message.updateMessage(data.payload.message);
-      },
-      ERROR: (data: ServerMessage<'ERROR'>): void => {
-        console.log('error', data.payload);
-      },
-      MSG_READ: (data: ServerMessage<'MSG_READ'>): void => {
-        message.updateMessageStatus(data.payload.message);
-      },
-      USER_EXTERNAL_LOGIN: (data: ServerMessage<'USER_EXTERNAL_LOGIN'>): void => {
-        users.addUsers([data.payload.user]);
-      },
-      USER_EXTERNAL_LOGOUT: (data: ServerMessage<'USER_EXTERNAL_LOGOUT'>): void => {
-        users.addUsers([data.payload.user]);
-      },
-      USER_LOGOUT: (data: ServerMessage<'USER_LOGOUT'>): void => {
-        console.log('logout', data);
-      },
-    };
+  constructor() {
+    this.connect();
+  }
+
+  public connect(): void {
+    this.socket = new WebSocket('ws://localhost:4000'); // сделать ссылку констой
 
     this.socket.onopen = (): void => {
-      console.log('open');
+      console.log('srabotal raz');
+      const log = session.getDate('login');
+      const pass = session.getDate('password');
+      if (log && pass) {
+        router.go(location.pathname);
+        console.log('srabotal dwa');
+        socket.login(log, pass);
+      } else {
+        router.go('/login');
+      }
     };
-    this.socket.onmessage = (event): void => {
-      const data: ServerMessage = JSON.parse(event.data);
 
-      const call = responseTypes[data.type];
-      // eslint-disable-next-line @typescript-eslint/consistent-type-assertions
-      call(data as any);
+    this.socket.onclose = (): void => {
+      this.connect();
     };
+  }
+
+  public on<T extends keyof PayloadType>(event: T, callback: (data: ServerData<T>) => void): void {
+    this.socket.addEventListener('message', (event_) => {
+      const data = JSON.parse(event_.data);
+      if (data.type === event) {
+        callback(data);
+      }
+    });
   }
 
   public onClose(): void {
@@ -75,15 +46,15 @@ export class ApiSocket {
     };
   }
 
-  public login(): void {
+  public login(login: string, password: string): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'USER_LOGIN',
         payload: {
           user: {
-            login: userId.selfLogin,
-            password: userId.password,
+            login: login,
+            password: password,
           },
         },
       }),
@@ -93,7 +64,7 @@ export class ApiSocket {
   public authenticatedUser(): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'USER_ACTIVE',
         payload: null,
       }),
@@ -103,7 +74,7 @@ export class ApiSocket {
   public unAuthenticatedUser(): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'USER_INACTIVE',
         payload: null,
       }),
@@ -113,7 +84,7 @@ export class ApiSocket {
   public getMessages(login: string): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'MSG_FROM_USER',
         payload: {
           user: {
@@ -124,14 +95,14 @@ export class ApiSocket {
     );
   }
 
-  public sendMessage(text: string): void {
+  public sendMessage(text: string, chatWith: string): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'MSG_SEND',
         payload: {
           message: {
-            to: userId.chatWith.value,
+            to: chatWith,
             text: text,
           },
         },
@@ -142,7 +113,7 @@ export class ApiSocket {
   public readMessage(id: string): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'MSG_READ',
         payload: {
           message: {
@@ -153,15 +124,15 @@ export class ApiSocket {
     );
   }
 
-  public logout(): void {
+  public logout(login: string, password: string): void {
     this.socket.send(
       JSON.stringify({
-        id: userId.userId,
+        id: messagingID,
         type: 'USER_LOGOUT',
         payload: {
           user: {
-            login: userId.selfLogin,
-            password: userId.password,
+            login: login,
+            password: password,
           },
         },
       }),

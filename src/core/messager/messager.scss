@@ -1,0 +1,26 @@
+.user-block {
+  width: 200px;
+  height: 700px;
+  background-color: green;
+}
+
+.messager {
+  display: flex;
+}
+
+.message-block {
+  display: flex;
+  flex-direction: column;
+}
+
+.send-block {
+  align-self: flex-end;
+}
+
+.message-wrapper {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 4px;
+  background-color: grey;
+}

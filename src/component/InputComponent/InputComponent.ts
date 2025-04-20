@@ -1,5 +1,5 @@
-import type { Props } from './baseComponent';
-import { BaseComponent } from './baseComponent';
+import type { Props } from '../baseComponent';
+import { BaseComponent } from '../baseComponent';
 export interface InputProps extends Props<'input'> {
   type?: string;
   name?: string;

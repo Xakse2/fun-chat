@@ -13,7 +13,7 @@ export class route extends BaseComponent {
 
   public onLoad(): void {
     const path = location.pathname;
-    if (path === '/' || path === '/index.html' || path === '/dist/index.html' || path === '/dist') {
+    if (path === '/index.html' || path === '/dist/index.html' || path === '/dist' || path === '/') {
       this.go('/login');
     } else {
       this.go(path);

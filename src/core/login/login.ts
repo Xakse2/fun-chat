@@ -1,10 +1,12 @@
-import { socket } from '../api/apiSocket';
-import { BaseComponent } from '../component/baseComponent';
-import { ButtonComponent } from '../component/buttonComponent';
-import { InputComponent } from '../component/InputComponent';
-import { router } from '../router/route';
-import { userId } from '../states/user';
-import { Observable } from '../util/observble/obserble';
+import { socket } from '../../api/apiSocket';
+import { BaseComponent } from '../../component/baseComponent';
+import { ButtonComponent } from '../../component/buttonComponent';
+import { InputComponent } from '../../component/InputComponent/InputComponent';
+import type { ServerData } from '../../type/websocketData';
+import { router } from '../../router/route';
+import { userId } from '../../states/user';
+import { session } from '../../service/sessionStotrage';
+import { users } from '../../states/usersState';
 
 export class Login extends BaseComponent {
   private validMessage;
@@ -18,6 +20,12 @@ export class Login extends BaseComponent {
   constructor() {
     super({
       className: ['login-wrapper'],
+    });
+
+    socket.on<'USER_LOGIN'>('USER_LOGIN', (data: ServerData<'USER_LOGIN'>) => {
+      session.setDate('login', userId.selfLogin);
+      session.setDate('password', userId.password);
+      router.go('/messager');
     });
 
     const loginButton = new ButtonComponent({
@@ -53,7 +61,7 @@ export class Login extends BaseComponent {
 
     const logOutButton = new ButtonComponent({
       onClick: (): void => {
-        socket.logout();
+        socket.logout(userId.selfLogin, userId.password);
       },
     });
 
