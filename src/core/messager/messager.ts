@@ -39,6 +39,12 @@ export class Messager extends BaseComponent {
       }),
     );
 
+    this.sub(
+      message.counetCool.subscribe(() => {
+        console.log(message.counetCool);
+      }),
+    );
+
     const usersBlock = new BaseComponent({
       className: ['user-block'],
     });

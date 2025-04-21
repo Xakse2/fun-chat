@@ -1,4 +1,4 @@
-import type { Message, PayloadType } from '../../type/websocketData';
+import type { Message } from '../../type/websocketData';
 import { BaseComponent } from '../baseComponent';
 import './MessageComponent.scss';
 

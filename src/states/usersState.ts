@@ -4,8 +4,6 @@ import type { PayloadType, ServerData } from '../type/websocketData';
 import { Observable } from '../util/observble/obserble';
 import { message } from './messageState';
 
-type Message = PayloadType['MSG_FROM_USER']['messages'];
-
 export class UsersState {
   private _users = new Observable<User[]>([]);
 

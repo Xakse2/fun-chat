@@ -7,6 +7,7 @@ import { router } from '../../router/route';
 import { userId } from '../../states/user';
 import { session } from '../../service/sessionStotrage';
 import { users } from '../../states/usersState';
+import { message } from '../../states/messageState';
 
 export class Login extends BaseComponent {
   private validMessage;
