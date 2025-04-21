@@ -39,12 +39,6 @@ export class Messager extends BaseComponent {
       }),
     );
 
-    this.sub(
-      message.counetCool.subscribe(() => {
-        console.log(message.counetCool);
-      }),
-    );
-
     const usersBlock = new BaseComponent({
       className: ['user-block'],
     });
@@ -108,10 +102,8 @@ export class Messager extends BaseComponent {
   }
 
   public drawMessages(): void {
-    console.log(this.count++);
     this.messageWrapper.destroyAllChildren();
     message.messages.value.forEach((message) => {
-      console.log(`${message.status.isReaded}`);
       const newMessage = new MessageComponent(message);
       this.messageWrapper.append(newMessage);
     });
